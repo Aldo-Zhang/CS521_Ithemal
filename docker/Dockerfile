@@ -23,11 +23,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
         zip
 
 # install mysql
-RUN wget -O /tmp/RPM-GPG-KEY-mysql https://repo.mysql.com/RPM-GPG-KEY-mysql && \
-        apt-key add /tmp/RPM-GPG-KEY-mysql && \
-        /bin/echo -e "deb http://repo.mysql.com/apt/debian/ stretch mysql-5.7\ndeb-src http://repo.mysql.com/apt/debian/ stretch mysql-5.7" > /etc/apt/sources.list.d/mysql.list && \
-        apt-get update && \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
+# install mysql client (server runs in separate container via docker-compose)
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y default-mysql-client
 
 COPY docker_my.cnf /etc/my.cnf
 
