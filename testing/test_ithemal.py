@@ -60,7 +60,7 @@ class TestIthemal:
         sql = open('test_data/test_costmodel.sql').read()
 
         for line in sql.split(';'):
-            print line
+            print(line)
             ut.execute_query(cnx,line,False,True)
         cnx.commit()
 
@@ -74,7 +74,7 @@ class TestIthemal:
         proc = subprocess.Popen(args,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         stdout, stderr = proc.communicate()
 
-        print stdout
+        print(stdout)
         success = False
         for line in stdout.split('\n'):
             if line == 'timing values registered for 78179 items':
