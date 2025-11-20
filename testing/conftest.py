@@ -10,7 +10,10 @@ if 'ITHEMAL_HOME' not in os.environ:
     test_dir = os.path.dirname(os.path.abspath(__file__))
     os.environ['ITHEMAL_HOME'] = os.path.dirname(test_dir)
 
-sys.path.insert(0, os.path.join(os.environ['ITHEMAL_HOME'], 'common', 'common_libs'))
+sys.path.insert(0, os.path.join(os.environ['ITHEMAL_HOME'], 'common'))
+
+if 'DYNAMORIO_HOME' not in os.environ: # If Dynamorio is not installed, skip the tests that require it
+    os.environ['DYNAMORIO_HOME'] = '/tmp/dynamorio_not_installed'
 
 dynamorio = pytest.mark.skipif('DYNAMORIO_HOME' not in os.environ.keys(),
                                 reason="DYNAMORIO_HOME not set")
@@ -27,7 +30,7 @@ def db_config():
     config = dict()
     with open('test_data/db_config.cfg','r') as f:
         for line in f:
-            found = re.search('([a-zA-Z\-]+) *= *\"*([a-zA-Z0-9#\./]+)\"*', line)
+            found = re.search(r'([a-zA-Z\-]+) *= *\"*([a-zA-Z0-9#\./]+)\"*', line)
             if found:
                 config[found.group(1)] = found.group(2)
 
