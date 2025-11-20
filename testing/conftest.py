@@ -5,6 +5,12 @@ import glob
 import re
 from shutil import copyfile
 
+if 'ITHEMAL_HOME' not in os.environ:
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    os.environ['ITHEMAL_HOME'] = os.path.dirname(test_dir)
+
+sys.path.insert(0, os.path.join(os.environ['ITHEMAL_HOME'], 'common', 'common_libs'))
+
 dynamorio = pytest.mark.skipif('DYNAMORIO_HOME' not in os.environ.keys(),
                                 reason="DYNAMORIO_HOME not set")
 
