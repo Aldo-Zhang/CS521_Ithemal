@@ -1,0 +1,35 @@
+# Python 3.11+ and PyTorch 2.8.0 compatible requirements
+# Core dependencies for modernized Ithemal code
+
+# Deep Learning Framework
+# NOTE: PyTorch 2.8.0 is the target but not yet available in pip (as of Nov 2025)
+# Code is tested with 2.2.2 and designed to be forward-compatible with 2.8.0+
+# All modernizations use standard PyTorch APIs that are stable across 2.x versions
+torch>=2.8.0  # Target: 2.8.0 when available, Currently: 2.2.2
+torchvision>=0.17.2  # Compatible with PyTorch 2.2+
+torchaudio>=2.2.2  # Compatible with PyTorch 2.2+
+
+# Numerical Computing
+numpy>=1.26.0,<2.0.0
+
+# Plotting
+matplotlib>=3.8.0,<4.0.0
+
+# Database
+mysql-connector-python>=8.0.33,<9.0.0
+
+# Graph Visualization
+graphviz>=0.20.1
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Type Checking (optional but recommended for Python 3.12)
+mypy>=1.7.0
+types-mysql-connector-python>=0.0.1
+
+# Code Quality (optional but recommended)
+black>=23.12.0
+ruff>=0.1.9
