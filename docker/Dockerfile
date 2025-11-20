@@ -12,8 +12,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
         man                         \
         nasm                        \
         pv                          \
-        python-dev                  \
-        qt5-default                 \
+        python3-dev                 \
+        qtbase5-dev                 \
         sqlite3                     \
         sudo                        \
         tmux                        \
