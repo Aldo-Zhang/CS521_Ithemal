@@ -5,7 +5,7 @@ import glob
 from conftest import *
 import common_libs.utilities as ut
 import mysql.connector
-import urllib
+import urllib.request # Python 3
 import time
 
 database = '--database=test_costmodel'
@@ -40,7 +40,10 @@ class TestIthemal:
 
     def test_create_ithemal_database(self):
 
-        urllib.urlretrieve ("http://web.mit.edu/charithm/www/test_costmodel.sql", "test_data/test_costmodel.sql")
+        urllib.request.urlretrieve(
+            "http://web.mit.edu/charithm/www/test_costmodel.sql", 
+            "test_data/test_costmodel.sql"
+        )
         assert os.path.exists('test_data/test_costmodel.sql')
 
         default_file = 'test_data/db_config.cfg'
@@ -76,7 +79,7 @@ class TestIthemal:
 
         print(stdout)
         success = False
-        for line in stdout.split('\n'):
+        for line in stdout.decode('utf-8').split('\n'):
             if line == 'timing values registered for 78179 items':
                 success = True
 

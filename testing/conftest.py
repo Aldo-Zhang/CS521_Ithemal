@@ -23,17 +23,25 @@ ithemal = pytest.mark.skipif('ITHEMAL_HOME' not in os.environ.keys(),
 
 @pytest.fixture(scope="module")
 def db_config():
-
-    if not os.path.exists('test_data/db_config.cfg'):
-        copyfile('test_data/example_config.cfg','test_data/db_config.cfg')
-
+    # Get the path to the test data directory and the example configuration file
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    test_data_dir = os.path.join(test_dir, 'test_data')
+    example_config = os.path.join(test_data_dir, 'example_config.cfg')
+    db_config_file = os.path.join(test_data_dir, 'db_config.cfg')
+    
+    if not os.path.exists(db_config_file):
+        if os.path.exists(example_config):
+            copyfile(example_config, db_config_file)
+        else:
+            pytest.skip(f"Missing test configuration file: {example_config}")
+    
     config = dict()
-    with open('test_data/db_config.cfg','r') as f:
+    with open(db_config_file, 'r') as f:
         for line in f:
             found = re.search(r'([a-zA-Z\-]+) *= *\"*([a-zA-Z0-9#\./]+)\"*', line)
             if found:
                 config[found.group(1)] = found.group(2)
-
+    
     return config
 
 

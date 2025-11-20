@@ -10,6 +10,7 @@ class TestDynamoRIO:
 
     drexec = os.environ['DYNAMORIO_HOME'] + '/bin64/drrun'
 
+    @dynamorio
     def test_dynamorio_installation(self):
 
         proc = subprocess.Popen([TestDynamoRIO.drexec,'--','ls'],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -19,7 +20,8 @@ class TestDynamoRIO:
 
         assert drout == normalout
 
-    @ithemal
+    @dynamorio 
+    @pytest.mark.ithemal
     def test_drclient_static(self):
 
         static_client = os.environ['ITHEMAL_HOME'] + '/data_collection/build/bin/libstatic.so'

@@ -23,7 +23,7 @@ class TestStats:
 
 
         success = False
-        for line in stdout.split('\n'):
+        for line in stdout.decode('utf-8').split('\n'):
             if line == 'Total 44 2934 0':
                 success = True
 
