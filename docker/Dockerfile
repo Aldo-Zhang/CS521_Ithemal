@@ -82,5 +82,6 @@ RUN /bin/echo 'export PATH=/opt/conda/bin:$PATH' >> /home/ithemal/.bashrc && \
 
 RUN bash -lc 'pip install --upgrade --user pyhamcrest pip; jupyter notebook --generate-config'
 
-COPY notebook_config.patch /tmp/_docker_notebook_conf.patch
-RUN patch .jupyter/jupyter_notebook_config.py < /tmp/_docker_notebook_conf.patch
+RUN echo "c.ServerApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.ServerApp.allow_origin = '*'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.ServerApp.allow_remote_access = True" >> ~/.jupyter/jupyter_notebook_config.py
