@@ -63,10 +63,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-ARG HOST_UID=1000
-ENV HOST_UID $HOST_UID
+# ARG HOST_UID=1000
+# # ENV HOST_UID $HOST_UID
 
-RUN groupadd -g 1000 ithemal && useradd -m -s /bin/bash -r -u $HOST_UID -g ithemal ithemal
+RUN groupadd -g 1000 ithemal && useradd -m -s /bin/bash -u 1000 -g ithemal ithemal
 USER ithemal
 WORKDIR /home/ithemal
 
