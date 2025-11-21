@@ -29,16 +29,13 @@ RUN apt-get update && \
 
 COPY docker_my.cnf /etc/my.cnf
 
-# Install Miniconda3 with Python 3.11
-RUN wget --quiet -O /tmp/install_conda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+# Install Miniforge (conda-forge only, no ToS required)
+RUN wget --quiet -O /tmp/install_conda.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh && \
         sh /tmp/install_conda.sh -b -p /opt/conda && \
         rm /tmp/install_conda.sh
 
-
-RUN /opt/conda/bin/conda config --remove channels defaults && \
-    /opt/conda/bin/conda config --add channels conda-forge && \
-    /opt/conda/bin/conda config --set channel_priority strict && \
-    /opt/conda/bin/conda create --name ithemal python=3.11 --yes
+# Create Python 3.11 environment (Miniforge uses conda-forge by default)
+RUN /opt/conda/bin/conda create --name ithemal python=3.11 -y
 
 RUN /opt/conda/envs/ithemal/bin/pip install --no-cache-dir \
         torch==2.8.0 \
