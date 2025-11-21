@@ -35,7 +35,10 @@ RUN wget --quiet -O /tmp/install_conda.sh https://repo.anaconda.com/miniconda/Mi
         rm /tmp/install_conda.sh
 
 
-RUN /opt/conda/bin/conda create --name ithemal python=3.11 -c conda-forge -y
+RUN /opt/conda/bin/conda config --remove channels defaults && \
+    /opt/conda/bin/conda config --add channels conda-forge && \
+    /opt/conda/bin/conda config --set channel_priority strict && \
+    /opt/conda/bin/conda create --name ithemal python=3.11 --yes
 
 RUN /opt/conda/envs/ithemal/bin/pip install --no-cache-dir \
         torch==2.8.0 \
