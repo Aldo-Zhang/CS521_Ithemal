@@ -8,12 +8,12 @@ import mysql.connector
 import urllib.request # Python 3
 import time
 
-database = '--database=testIthemal'
-config = '--config=test_data/example_config.cfg'
-arch = '--arch=63'
+database = 'testIthemal'
+config = 'test_data/example_config.cfg'
+arch = '63'
 
 home = os.environ['ITHEMAL_HOME']
-script = home + '/learning/pytorch/ithemal/run_ithemal.py'
+script = home + '/learning/pytorch/ithemal/save_data.py'
 savedata = home + '/learning/pytorch/inputs/data/time_skylake_test.data'
 embedfile = home + '/learning/pytorch/inputs/embeddings/code_delim.emb'
 savemodel = home + '/learning/pytorch/inputs/models/test_skylake.mdl'
@@ -73,18 +73,23 @@ class TestIthemal:
 
     def test_savedata(self):
 
+        args = ['python', script, savedata, '--arch', arch, '--database', database, '--config', config]
 
-        args = ['python',script, config, database, arch, '--mode=save','--savedatafile=' + savedata]
+        print(f"Running: {' '.join(args)}")
         proc = subprocess.Popen(args,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         stdout, stderr = proc.communicate()
 
-        print(stdout)
+        print("STDOUT:", stdout.decode('utf-8'))
+        print("STDERR:", stderr.decode('utf-8'))
+
         success = False
-        for line in stdout.decode('utf-8').split('\n'):
-            if 'timing values registered for' in line and 'items' in line:
-                success = True
-                print(f"Found: {line}")
-                break
+        assert os.path.exists(savedata), f"Data file was not created: {savedata}"
+        print(f"Success! Data saved to {savedata}")
+        # for line in stdout.decode('utf-8').split('\n'):
+        #     if 'timing values registered for' in line and 'items' in line:
+        #         success = True
+        #         print(f"Found: {line}")
+        #         break
 
         assert success
 
