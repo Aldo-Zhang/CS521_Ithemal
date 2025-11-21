@@ -52,7 +52,10 @@ RUN /opt/conda/envs/ithemal/bin/pip install --no-cache-dir \
         mysql-connector-python
         
 RUN curl -sL https://github.com/DynamoRIO/dynamorio/releases/download/release_7_0_0_rc1/DynamoRIO-Linux-7.0.0-RC1.tar.gz | tar xz -C /opt
+RUN chmod -R +x /opt/DynamoRIO-Linux-7.0.0-RC1/bin64/
+
 ENV DYNAMORIO_HOME "/opt/DynamoRIO-Linux-7.0.0-RC1"
+
 # tar will not give you `755 & ~umask` because tar is evil
 RUN chown -R root:root "${DYNAMORIO_HOME}" && \
         find "${DYNAMORIO_HOME}" -type d -exec chmod 755 {} \; && \
