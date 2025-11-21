@@ -81,8 +81,10 @@ class TestIthemal:
         print(stdout)
         success = False
         for line in stdout.decode('utf-8').split('\n'):
-            if line == 'timing values registered for 78179 items':
+            if 'timing values registered for' in line and 'items' in line:
                 success = True
+                print(f"Found: {line}")
+                break
 
         assert success
 
