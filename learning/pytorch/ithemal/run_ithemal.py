@@ -14,7 +14,7 @@ from tqdm import tqdm
 from mpconfig import MPConfig
 from typing import Callable, List, Optional, Iterator, Tuple, NamedTuple, Union
 import random
-import Queue
+import queue
 from ithemal_utils import *
 import training
 import pandas as pd
