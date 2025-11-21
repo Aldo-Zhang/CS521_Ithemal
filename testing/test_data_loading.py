@@ -1,4 +1,5 @@
 # test_data_loading.py
+import os
 def test_load_sample_data():
     """Test if the sample data can be loaded"""
     import torch
