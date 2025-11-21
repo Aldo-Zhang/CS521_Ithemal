@@ -110,6 +110,7 @@ def test_training_components_available():
     """Quick smoke test that training components can be imported"""
     import sys
     sys.path.insert(0, os.path.join(os.environ['ITHEMAL_HOME'], 'learning/pytorch'))
+    sys.path.insert(0, os.path.join(os.environ['ITHEMAL_HOME'], 'learning/pytorch/ithemal'))
     
     try:
         from data import data_cost
