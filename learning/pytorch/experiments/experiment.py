@@ -6,7 +6,7 @@ import json
 import os
 import subprocess
 import sys
-import urlparse
+from urllib.parse import urlunsplit
 import tempfile
 import time
 import traceback
@@ -41,7 +41,7 @@ def debug_print(params):
 
 def get_s3_url(bucket, path):
     # type: (str, str) -> str
-    return urlparse.urlunsplit(['s3', bucket, path, '', ''])
+    return urlunsplit(['s3', bucket, path, '', ''])
 
 def mkdir(directory):
     # type: (str) -> None
