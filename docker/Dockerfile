@@ -34,10 +34,11 @@ RUN wget --quiet -O /tmp/install_conda.sh https://repo.anaconda.com/miniconda/Mi
         sh /tmp/install_conda.sh -b -p /opt/conda && \
         rm /tmp/install_conda.sh
 
-# Create Python 3.11 environment with PyTorch 2.8.0
-RUN /opt/conda/bin/conda create --name ithemal python=3.11 -y && \
-    /opt/conda/bin/conda install -n ithemal -c pytorch -c conda-forge \
-        pytorch=2.8.0 \
+
+RUN /opt/conda/bin/conda create --name ithemal python=3.11 -c conda-forge -y
+
+RUN /opt/conda/envs/ithemal/bin/pip install --no-cache-dir \
+        torch==2.8.0 \
         torchvision \
         torchaudio \
         numpy \
@@ -45,11 +46,10 @@ RUN /opt/conda/bin/conda create --name ithemal python=3.11 -y && \
         matplotlib \
         jupyter \
         pytest \
+        pytest-cov \
         tqdm \
         graphviz \
-        python-graphviz \
-        mysql-connector-python \
-        -y
+        mysql-connector-python
         
 RUN curl -sL https://github.com/DynamoRIO/dynamorio/releases/download/release_7_0_0_rc1/DynamoRIO-Linux-7.0.0-RC1.tar.gz | tar xz -C /opt
 ENV DYNAMORIO_HOME "/opt/DynamoRIO-Linux-7.0.0-RC1"
