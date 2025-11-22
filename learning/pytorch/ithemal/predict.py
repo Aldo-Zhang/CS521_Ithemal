@@ -38,6 +38,9 @@ def load_model_and_data(model_file, model_data_file):
 _fake_intel = '\n'*500
 
 def datum_of_code(data, block_hex, verbose):
+    # Clean hex string
+    block_hex = block_hex.strip().lower()
+
     xml = subprocess.check_output([_TOKENIZER, block_hex, '--token']).decode('utf-8')
     if verbose:
         intel = subprocess.check_output([_TOKENIZER, block_hex, '--intel']).decode('utf-8')
