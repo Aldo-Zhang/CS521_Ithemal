@@ -59,7 +59,6 @@ def example_binary():
         compile_cmd = [
             'gcc',
             '-O0',  # Disable optimizations
-            '-fno-unroll-loops',  # Prevent loop unrolling
             '-o', binary_path,
             example_c,
             '-I', os.path.dirname(example_h)
