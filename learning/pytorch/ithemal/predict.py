@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import argparse
 import binascii
-import bytes 
 import common_libs.utilities as ut
 import copy
 import data.data_cost as dt
