@@ -87,6 +87,42 @@ def test_predict_file_mode(predict_script, trained_model, example_binary):
     """Test prediction with binary file input (--files mode)"""
     predictor_dump, trained_mdl = trained_model
     
+    # Debug: Extract and print the hex string and XML
+    import binascii
+    with open(example_binary, 'rb') as f:
+        content = f.read()
+        start_marker = bytes.fromhex('bb6f000000646790')
+        end_marker = bytes.fromhex('bbde000000646790')
+        if start_marker in content and end_marker in content:
+            start_idx = content.index(start_marker)
+            end_idx = content.index(end_marker)
+            block = content[start_idx + len(start_marker):end_idx]
+            block_hex = block.hex()
+            
+            print(f"\n{'='*60}")
+            print(f"DEBUG: Extracted block hex: {block_hex}")
+            print(f"DEBUG: Block length: {len(block)} bytes")
+            print(f"{'='*60}\n")
+            
+            # Test tokenizer directly
+            import subprocess
+            import os
+            tokenizer = os.path.join(os.environ['ITHEMAL_HOME'], 'data_collection', 'build', 'bin', 'tokenizer')
+            try:
+                result = subprocess.run(
+                    [tokenizer, block_hex, '--token'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=10,
+                    text=True
+                )
+                print(f"Tokenizer exit code: {result.returncode}")
+                print(f"Tokenizer XML output:\n{result.stdout}")
+                if result.stderr:
+                    print(f"Tokenizer STDERR:\n{result.stderr}")
+            except Exception as e:
+                print(f"Failed to run tokenizer: {e}")
+    
     args = [
         'python', predict_script,
         '--model', predictor_dump,
