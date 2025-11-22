@@ -169,21 +169,26 @@ def load_model_and_data(fname):
     # Models saved with PyTorch 1.x use _flat_weights, PyTorch 2.x uses _all_weights
     
     import torch.nn.modules.rnn as rnn_module
+    import torch.nn as nn
     
     # Save original __setstate__
     original_lstm_setstate = rnn_module.LSTM.__setstate__
     
     def compatible_lstm_setstate(self, d):
         """Completely rewrite __setstate__ to handle PyTorch 1.x -> 2.x conversion"""
-        # Convert _flat_weights to _all_weights if present
-        if '_flat_weights' in d:
-            d['_all_weights'] = d['_flat_weights']
-            del d['_flat_weights']
+        # Convert _flat_weights to _all_weights before calling Module.__setstate__
+        state_dict = d.copy()
+        if '_flat_weights' in state_dict:
+            state_dict['_all_weights'] = state_dict['_flat_weights']
+            del state_dict['_flat_weights']
         
-        # Manually restore all state attributes (don't call original __setstate__)
-        # This avoids the AttributeError when original tries to access self._flat_weights
-        for key, value in d.items():
-            setattr(self, key, value)
+        # Call nn.Module.__setstate__ first to initialize module internals
+        # This will set up _state_dict_pre_hooks, _parameters, etc.
+        nn.Module.__setstate__(self, state_dict)
+        
+        # Ensure _all_weights is properly set (PyTorch 2.x requirement)
+        if '_all_weights' in state_dict:
+            self._all_weights = state_dict['_all_weights']
     
     # Apply patch
     rnn_module.LSTM.__setstate__ = compatible_lstm_setstate
