@@ -165,7 +165,7 @@ def dump_model_and_data(model, data, fname):
 
 def load_model_and_data(fname):
     # type: (str) -> (md.AbstractGraphMode, dt.DataCost)
-    dump = torch.load(fname)
+    dump = torch.load(fname, weights_only=False)
     data = dt.DataInstructionEmbedding()
     data.read_meta_data()
     data.load_dataset_params(dump.dataset_params)
