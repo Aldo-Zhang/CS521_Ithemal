@@ -27,7 +27,7 @@ def load_model_and_data(model_file, model_data_file):
         warnings.simplefilter('ignore', torch.serialization.SourceChangeWarning)
         (model, data) = ithemal_utils.load_model_and_data(model_file)
 
-    state_dict = torch.load(model_data_file)
+    state_dict = torch.load(model_data_file, weights_only=False)
     model_dict = model.state_dict()
     new_model_dict = {k: v for (k, v) in state_dict['model'].items() if k in model_dict}
     model_dict.update(new_model_dict)
