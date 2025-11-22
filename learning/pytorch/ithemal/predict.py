@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import argparse
 import binascii
+import bytes 
 import common_libs.utilities as ut
 import copy
 import data.data_cost as dt
@@ -17,8 +18,8 @@ import threading
 import torch
 import warnings
 
-START_MARKER = 'bb6f000000646790'.decode('hex')
-END_MARKER = 'bbde000000646790'.decode('hex')
+START_MARKER = bytes.fromhex('bb6f000000646790')
+END_MARKER = bytes.fromhex('bbde000000646790')
 
 _TOKENIZER = os.path.join(os.environ['ITHEMAL_HOME'], 'data_collection', 'build', 'bin', 'tokenizer')
 
@@ -38,9 +39,9 @@ def load_model_and_data(model_file, model_data_file):
 _fake_intel = '\n'*500
 
 def datum_of_code(data, block_hex, verbose):
-    xml = subprocess.check_output([_TOKENIZER, block_hex, '--token'])
+    xml = subprocess.check_output([_TOKENIZER, block_hex, '--token']).decode('utf-8')
     if verbose:
-        intel = subprocess.check_output([_TOKENIZER, block_hex, '--intel'])
+        intel = subprocess.check_output([_TOKENIZER, block_hex, '--intel']).decode('utf-8')
     else:
         intel = _fake_intel
 
@@ -61,7 +62,7 @@ def read_basic_block(fname, data, verbose):
         raise ValueError('END MARKER NOT FOUND')
 
     block_binary = code[start_pos+len(START_MARKER):end_pos]
-    return datum_of_code(data, binascii.b2a_hex(block_binary), verbose)
+    return datum_of_code(data, binascii.b2a_hex(block_binary).decode('utf-8'), verbose)
 
 def predict(model, data, fname, verbose):
     datum = read_basic_block(fname, data, verbose)
@@ -112,7 +113,7 @@ def predict_raw(model_arg, data_arg, verbose, parallel):
     output_worker.start()
     try:
         while True:
-            line = raw_input().strip()
+            line = input().strip()
             input_q.put(line)
     except EOFError:
         for _ in range(parallel):
@@ -134,8 +135,8 @@ def main():
     input_group.add_argument(
         '--files',
         help='Binary files to analyze. Relevant basic block must be started by 0x{} and terminated by 0x{}'.format(
-            binascii.b2a_hex(START_MARKER),
-            binascii.b2a_hex(END_MARKER)
+            START_MARKER.hex(),
+            END_MARKER.hex(),
         ),
         nargs='+',
     )
