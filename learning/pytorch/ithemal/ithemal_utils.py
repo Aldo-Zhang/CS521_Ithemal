@@ -208,74 +208,40 @@ def load_model_and_data(fname):
                 
                 # Fix 1: proj_size (defaults to 0 in PyTorch 1.x, required in PyTorch 2.x)
                 if not hasattr(child, 'proj_size'):
-                    child.proj_size = 0  # Default value for non-projected LSTM
+                    child.proj_size = 0
                 
-                # Fix 2: _flat_weight_refs and _flat_weights_names
-                # Check if these attributes are missing or invalid
-                needs_fix = (not hasattr(child, '_flat_weight_refs') or 
-                            child._flat_weight_refs is None or
-                            (isinstance(child._flat_weight_refs, list) and len(child._flat_weight_refs) == 0))
-                
-                if needs_fix:
-                    # Method 1: Try _update_flat_weights
-                    if hasattr(child, '_update_flat_weights'):
-                        try:
-                            child._update_flat_weights()
-                            # Verify it worked
-                            if hasattr(child, '_flat_weight_refs') and child._flat_weight_refs is not None:
-                                if isinstance(child._flat_weight_refs, list) and len(child._flat_weight_refs) > 0:
-                                    continue  # Success, move to next module
-                        except (AttributeError, RuntimeError, TypeError, KeyError):
-                            pass  # Will try other methods
-                    
-                    # Method 2: Extract from _all_weights
+                # Fix 2: _flat_weights - THE SIMPLEST FIX
+                # PyTorch 2.x forward() accesses _flat_weights[0] directly
+                # The simplest solution: set it directly from parameters
+                if not hasattr(child, '_flat_weights') or child._flat_weights is None or len(child._flat_weights) == 0:
+                    # Get all weight and bias parameters
                     flat_weights = []
-                    if hasattr(child, '_all_weights') and child._all_weights is not None:
-                        import weakref
-                        # Flatten _all_weights - handle both flat lists and nested lists
-                        def extract_tensors(item):
-                            if isinstance(item, torch.Tensor):
-                                flat_weights.append(item)
-                            elif isinstance(item, (list, tuple)):
-                                for subitem in item:
-                                    extract_tensors(subitem)
-                        
-                        for item in child._all_weights:
-                            extract_tensors(item)
+                    for param in child.parameters():
+                        if param.requires_grad or not param.requires_grad:  # Include all parameters
+                            flat_weights.append(param)
                     
-                    # Method 3: Extract from named_parameters if _all_weights failed
-                    if not flat_weights:
-                        for name, param in child.named_parameters():
-                            if 'weight' in name or 'bias' in name:
-                                flat_weights.append(param)
+                    # Set _flat_weights directly (this is what PyTorch 2.x forward() needs)
+                    child._flat_weights = flat_weights
                     
-                    # Set the attributes
-                    if flat_weights:
+                    # Also set _flat_weight_refs for completeness (PyTorch 2.x internal use)
+                    if not hasattr(child, '_flat_weight_refs') or child._flat_weight_refs is None:
                         import weakref
-                        try:
-                            child._flat_weight_refs = [weakref.ref(w) for w in flat_weights]
-                            # Generate flat weight names
-                            num_directions = 2 if child.bidirectional else 1
-                            weight_names = []
-                            for layer in range(child.num_layers):
-                                for direction in range(num_directions):
-                                    suffix = '_reverse' if direction == 1 else ''
-                                    weight_names.extend([
-                                        f'weight_ih_l{layer}{suffix}',
-                                        f'weight_hh_l{layer}{suffix}',
-                                        f'bias_ih_l{layer}{suffix}',
-                                        f'bias_hh_l{layer}{suffix}',
-                                    ])
-                            # Match the number of actual weights
-                            child._flat_weights_names = weight_names[:len(flat_weights)]
-                        except (TypeError, AttributeError):
-                            # Fallback: set empty lists (PyTorch will initialize during forward)
-                            child._flat_weight_refs = []
-                            child._flat_weights_names = []
-                    else:
-                        # No weights found, set empty lists
-                        child._flat_weight_refs = []
-                        child._flat_weights_names = []
+                        child._flat_weight_refs = [weakref.ref(w) for w in flat_weights]
+                    
+                    # Set _flat_weights_names if missing
+                    if not hasattr(child, '_flat_weights_names') or child._flat_weights_names is None:
+                        num_directions = 2 if child.bidirectional else 1
+                        weight_names = []
+                        for layer in range(child.num_layers):
+                            for direction in range(num_directions):
+                                suffix = '_reverse' if direction == 1 else ''
+                                weight_names.extend([
+                                    f'weight_ih_l{layer}{suffix}',
+                                    f'weight_hh_l{layer}{suffix}',
+                                    f'bias_ih_l{layer}{suffix}',
+                                    f'bias_hh_l{layer}{suffix}',
+                                ])
+                        child._flat_weights_names = weight_names[:len(flat_weights)]
             else:
                 # Recursively fix child modules
                 fix_lstm_module(child)
