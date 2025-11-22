@@ -61,7 +61,9 @@ def read_basic_block(fname, data, verbose):
         raise ValueError('END MARKER NOT FOUND')
 
     block_binary = code[start_pos+len(START_MARKER):end_pos]
-    return datum_of_code(data, binascii.b2a_hex(block_binary).decode('utf-8'), verbose)
+    #  Use .hex() method instead of binascii.b2a_hex()
+    block_hex = block_binary.hex()
+    return datum_of_code(data, block_hex, verbose)
 
 def predict(model, data, fname, verbose):
     datum = read_basic_block(fname, data, verbose)
