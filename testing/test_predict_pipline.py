@@ -40,28 +40,24 @@ def trained_model():
 
 @pytest.fixture(scope="module")
 def example_binary():
-    """Compile example.c to create a test binary with IACA markers"""
+    """Compile example.S (assembly) to create a test binary with IACA markers"""
     home = os.environ['ITHEMAL_HOME']
-    example_c = os.path.join(home, 'learning/pytorch/examples/example.c')
-    example_h = os.path.join(home, 'learning/pytorch/examples/iacaMarks.h')
+    example_s = os.path.join(home, 'learning/pytorch/examples/example.S')
     
-    if not os.path.exists(example_c):
-        pytest.skip(f"example.c not found: {example_c}")
-    if not os.path.exists(example_h):
-        pytest.skip(f"iacaMarks.h not found: {example_h}")
+    if not os.path.exists(example_s):
+        pytest.skip(f"example.S not found: {example_s}")
     
     # Create temporary directory for compiled binary
     temp_dir = tempfile.mkdtemp(prefix='ithemal_test_')
     binary_path = os.path.join(temp_dir, 'example_binary')
     
     try:
-        # Compile example.c
+        # Compile assembly file - guaranteed to be a single basic block
         compile_cmd = [
             'gcc',
-            '-O0',  # Disable optimizations
+            '-c',  # Compile to object file
             '-o', binary_path,
-            example_c,
-            '-I', os.path.dirname(example_h)
+            example_s
         ]
         
         result = subprocess.run(
@@ -72,7 +68,7 @@ def example_binary():
         )
         
         if result.returncode != 0:
-            pytest.skip(f"Failed to compile example.c: {result.stderr}")
+            pytest.skip(f"Failed to compile example.S: {result.stderr}")
         
         if not os.path.exists(binary_path):
             pytest.skip(f"Compiled binary not found: {binary_path}")
