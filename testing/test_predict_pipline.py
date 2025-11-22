@@ -40,25 +40,36 @@ def trained_model():
 
 @pytest.fixture(scope="module")
 def example_binary():
-    """Compile example.S (assembly) to create a test binary with IACA markers"""
+    """Compile example.c to create a test binary with IACA markers"""
     home = os.environ['ITHEMAL_HOME']
-    example_s = os.path.join(home, 'learning/pytorch/examples/example.S')
+    example_c = os.path.join(home, 'learning/pytorch/examples/simple_example.c')
+    example_h = os.path.join(home, 'learning/pytorch/examples/iacaMarks.h')
     
-    if not os.path.exists(example_s):
-        pytest.skip(f"example.S not found: {example_s}")
+    if not os.path.exists(example_c):
+        pytest.skip(f"example.c not found: {example_c}")
+    if not os.path.exists(example_h):
+        pytest.skip(f"iacaMarks.h not found: {example_h}")
     
     # Create temporary directory for compiled binary
     temp_dir = tempfile.mkdtemp(prefix='ithemal_test_')
     binary_path = os.path.join(temp_dir, 'example_binary')
     
     try:
-        # Compile assembly file - guaranteed to be a single basic block
+        # Compile example.c following original Ithemal guidance
+        # Use -O0 to prevent loop unrolling and ensure IACA markers
+        # are around simple sequential code without branches
         compile_cmd = [
             'gcc',
-            '-c',  # Compile to object file
+            '-O0',  # Disable optimizations (matches original behavior)
             '-o', binary_path,
-            example_s
+            example_c,
+            '-I', os.path.dirname(example_h)
         ]
+        
+        print(f"\n{'='*60}")
+        print(f"Compiling example.c (following original Ithemal guidance)...")
+        print(f"Command: {' '.join(compile_cmd)}")
+        print(f"{'='*60}\n")
         
         result = subprocess.run(
             compile_cmd,
@@ -68,11 +79,14 @@ def example_binary():
         )
         
         if result.returncode != 0:
-            pytest.skip(f"Failed to compile example.S: {result.stderr}")
+            print(f"Compilation STDOUT: {result.stdout}")
+            print(f"Compilation STDERR: {result.stderr}")
+            pytest.skip(f"Failed to compile example.c: {result.stderr}")
         
         if not os.path.exists(binary_path):
             pytest.skip(f"Compiled binary not found: {binary_path}")
         
+        print(f"✓ Successfully compiled binary: {binary_path}")
         yield binary_path
         
     finally:
