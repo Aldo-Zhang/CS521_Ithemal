@@ -165,7 +165,30 @@ def dump_model_and_data(model, data, fname):
 
 def load_model_and_data(fname):
     # type: (str) -> (md.AbstractGraphMode, dt.DataCost)
-    dump = torch.load(fname, weights_only=False)
+    # PyTorch 2.x compatibility fix for LSTM _flat_weights issue
+    # Models saved with PyTorch 1.x use _flat_weights, PyTorch 2.x uses _all_weights
+    
+    # Temporarily patch LSTM to handle old format
+    import torch.nn.modules.rnn as rnn_module
+    
+    # Save original __setstate__
+    original_lstm_setstate = rnn_module.LSTM.__setstate__
+    
+    def compatible_lstm_setstate(self, d):
+        # Convert _flat_weights to _all_weights if needed
+        if '_flat_weights' in d and '_all_weights' not in d:
+            d['_all_weights'] = d['_flat_weights']
+            del d['_flat_weights']
+        return original_lstm_setstate(self, d)
+    
+    # Apply patch
+    rnn_module.LSTM.__setstate__ = compatible_lstm_setstate
+    
+    try:
+        dump = torch.load(fname, weights_only=False)
+    finally:
+        # Restore original
+        rnn_module.LSTM.__setstate__ = original_lstm_setstate
     data = dt.DataInstructionEmbedding()
     data.read_meta_data()
     data.load_dataset_params(dump.dataset_params)
