@@ -204,7 +204,13 @@ def load_model_and_data(fname):
         """Recursively fix LSTM modules to have PyTorch 2.x required attributes"""
         for child in module.children():
             if isinstance(child, nn.LSTM):
-                # PyTorch 2.x requires _flat_weight_refs and _flat_weights_names
+                # PyTorch 2.x requires additional attributes that may be missing from PyTorch 1.x models
+                
+                # Fix 1: proj_size (defaults to 0 in PyTorch 1.x, required in PyTorch 2.x)
+                if not hasattr(child, 'proj_size'):
+                    child.proj_size = 0  # Default value for non-projected LSTM
+                
+                # Fix 2: _flat_weight_refs and _flat_weights_names
                 # Check if these attributes are missing or invalid
                 needs_fix = (not hasattr(child, '_flat_weight_refs') or 
                             child._flat_weight_refs is None or
