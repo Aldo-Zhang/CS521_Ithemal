@@ -198,6 +198,49 @@ def load_model_and_data(fname):
     finally:
         # Restore original
         rnn_module.LSTM.__setstate__ = original_lstm_setstate
+    
+    # Post-load fix: Ensure all LSTM modules have PyTorch 2.x required attributes
+    def fix_lstm_module(module):
+        """Recursively fix LSTM modules to have PyTorch 2.x required attributes"""
+        for child in module.children():
+            if isinstance(child, nn.LSTM):
+                # PyTorch 2.x requires _flat_weight_refs and _flat_weights_names
+                # These are set by _update_flat_weights(), but may be missing when loading PyTorch 1.x models
+                if not hasattr(child, '_flat_weight_refs') or child._flat_weight_refs is None:
+                    # Try to call _update_flat_weights if it exists
+                    if hasattr(child, '_update_flat_weights'):
+                        try:
+                            child._update_flat_weights()
+                        except (AttributeError, RuntimeError):
+                            # If it fails, we'll need to set these manually
+                            pass
+                    
+                    # If still missing, manually initialize from _all_weights
+                    if (not hasattr(child, '_flat_weight_refs') or child._flat_weight_refs is None) and \
+                       hasattr(child, '_all_weights') and child._all_weights is not None:
+                        import weakref
+                        child._flat_weight_refs = [weakref.ref(w) for w in child._all_weights]
+                        # Generate flat weight names
+                        num_directions = 2 if child.bidirectional else 1
+                        weight_names = []
+                        for layer in range(child.num_layers):
+                            for direction in range(num_directions):
+                                suffix = '_reverse' if direction == 1 else ''
+                                weight_names.extend([
+                                    f'weight_ih_l{layer}{suffix}',
+                                    f'weight_hh_l{layer}{suffix}',
+                                    f'bias_ih_l{layer}{suffix}',
+                                    f'bias_hh_l{layer}{suffix}',
+                                ])
+                        child._flat_weights_names = weight_names
+            else:
+                # Recursively fix child modules
+                fix_lstm_module(child)
+    
+    # Fix all LSTM modules in the loaded model
+    if hasattr(dump, 'model'):
+        fix_lstm_module(dump.model)
+    
     data = dt.DataInstructionEmbedding()
     data.read_meta_data()
     data.load_dataset_params(dump.dataset_params)
