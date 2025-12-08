@@ -201,6 +201,7 @@ Level 2: Component Tests (Medium, ~10s)
 
 Level 3: Integration Tests (Slow, ~15s+)
   └── test_training_pipeline.py - End-to-end training
+  └── test_predict_pipeline.py - End-to-end predict
 ```
 
 ### Inside Container
