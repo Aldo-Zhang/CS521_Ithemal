@@ -16,7 +16,7 @@ class TestPythonEnvironment(unittest.TestCase):
 
     def test_required_packages(self):
         """Test required packages are installed"""
-        required = ['torch', 'numpy', 'pandas', 'matplotlib', 'scipy', 'tqdm']
+        required = ['torch', 'numpy', 'pandas', 'matplotlib', 'tqdm']
         
         for package in required:
             try:

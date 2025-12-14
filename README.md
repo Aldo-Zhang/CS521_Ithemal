@@ -10,6 +10,23 @@ This project trains Ithemal on Bhive data set and evaluates the results. Code ad
 
 ---
 
+## 0. VM Setup (Optional)
+
+Training requires significant CPU resources. Recommended AWS EC2 setup:
+
+| Component | Recommendation |
+|-----------|----------------|
+| Instance | `c6a.8xlarge` (32 vCPU) or larger |
+| AMI | Deep Learning Base AMI (Amazon Linux 2023) |
+| Storage | 100GB EBS |
+
+**Install docker-compose** (not included in the AMI):
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
 ## 1. Docker Setup
 
 It is recommended to train the model in docker containers.
@@ -50,7 +67,7 @@ export DYNAMORIO_HOME=/home/ithemal/dynamorio/build
 # Clone BHive dataset
 git clone https://github.com/ithemal/bhive.git
 
-# Run preprocessing (~30 min for all 3 architectures)
+# Run preprocessing (~5 min for all 3 architectures)
 python bhive_preprocess.py
 
 # Move to training directory
@@ -74,15 +91,17 @@ nohup python learning/pytorch/ithemal/run_ithemal.py \
     --experiment-name bhive_ivb \
     --experiment-time $(date +%s) \
     --sgd \
-    --threads 5 \
+    --threads 8 \
     --trainers 6 \
     --weird-lr \
     --decay-lr \
     --epochs 100 \
     > training_ivb.log 2>&1 &
 
+# Sleep for 3 seconds
+sleep 3
 # Monitor
-tail -f training_ivb.log
+less +F training_ivb.log
 ```
 
 ### Recommended Settings
@@ -178,16 +197,13 @@ python analyze_results.py --arch skl --results_dir ./results/skl/ --output_dir .
 
 ## Tests
 
-New tests are architected for Bhive training process specifically.
+New tests are architected for Bhive training pipeline specifically.
 
 ### BHive Pipeline Tests (Recommended)
 
 ```bash
 # One-click test all BHive pipeline components
 pytest bhive_tests/ -v
-
-# Quick tests only (skip slow training/prediction tests)
-pytest bhive_tests/ -v -m "not slow"
 
 # Individual test modules
 pytest bhive_tests/test_environment.py -v     # Environment & dependencies
