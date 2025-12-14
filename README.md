@@ -1,6 +1,6 @@
 # CS521 Ithemal Setup Guide
 
-This project trains Ithemal on Bhive data set and evaluates the results. Code adopted from [Ithemal Repository](https://github.com/ithemal/Ithemal).
+This project trains Ithemal on Bhive data set and evaluates the results. Code adpated from [Ithemal Repository](https://github.com/ithemal/Ithemal).
 
 ## Pipeline Overview
 
