@@ -207,10 +207,7 @@ pytest bhive_tests/ -v
 
 # Individual test modules
 pytest bhive_tests/test_environment.py -v     # Environment & dependencies
-pytest bhive_tests/test_preprocess.py -v      # Preprocessing script
-pytest bhive_tests/test_analyze.py -v         # Analysis script
 pytest bhive_tests/test_data_loading.py -v    # Data loading
-pytest bhive_tests/test_model_components.py -v # Model components
 pytest bhive_tests/test_training_pipeline.py -v # Training pipeline (slow)
 pytest bhive_tests/test_predict_pipeline.py -v  # Prediction pipeline (slow)
 ```
